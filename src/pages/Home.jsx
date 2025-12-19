@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabase";
 import Layout from "../components/Layout";
 import CompanyCard from "../components/CompanyCard";
+import CompanyCardSkeleton from "../components/CompantCardSkeleton";
 import {
   Search,
   X,
@@ -15,8 +16,7 @@ import {
   ArrowRight,
   Check,
   ChevronRight,
-  MapPin,
-  Wifi,
+  Zap,
 } from "lucide-react";
 
 export default function Home() {
@@ -48,20 +48,24 @@ export default function Home() {
     }
   }
 
-  const categories = [
-    "All",
-    ...new Set(companies.map((c) => c.category || "General")),
-  ];
-  const visibleCompanies = companies.filter((c) => {
-    const matchesSearch =
-      c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.slogan?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      activeCategory === "All" || c.category === activeCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const categories = useMemo(() => {
+    return ["All", ...new Set(companies.map((c) => c.category || "General"))];
+  }, [companies]);
 
-  const selectedCompanies = companies.filter((c) => selectedIds.includes(c.id));
+  const visibleCompanies = useMemo(() => {
+    return companies.filter((c) => {
+      const matchesSearch =
+        c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.slogan?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory =
+        activeCategory === "All" || c.category === activeCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [companies, searchTerm, activeCategory]);
+
+  const selectedCompanies = useMemo(() => {
+    return companies.filter((c) => selectedIds.includes(c.id));
+  }, [companies, selectedIds]);
 
   const toggleSelection = (e, id) => {
     if (e) e.preventDefault();
@@ -76,31 +80,33 @@ export default function Home() {
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+  const getLogoUrl = (company) => {
+    return `https://ui-avatars.com/api/?name=${company.name}&background=random&color=fff&size=128&font-size=0.33`;
+  };
+
+  const renderValue = (val) => {
+    if (val === true)
+      return <Check className="w-5 h-5 text-green-500 mx-auto" />;
+    if (val === false || val === undefined || val === null)
+      return <span className="text-slate-300">—</span>;
+    return <span className="text-sm font-medium text-slate-700">{val}</span>;
   };
 
   const comparisonRows = [
     {
-      section: "Company Overview",
+      section: "Overview",
       icon: <BarChart3 className="w-5 h-5 text-blue-600" />,
       rows: [
         { label: "Founded", value: (c) => c.founded_year },
+        { label: "Ownership", value: (c) => c.metrics?.ownership || "Private" },
         {
           label: "Locations",
           value: (c) => c.metrics?.locations_count || "N/A",
         },
-        { label: "Ownership", value: (c) => c.metrics?.ownership || "Private" },
       ],
     },
     {
-      section: "Service Capabilities",
+      section: "Capabilities",
       icon: <ShieldCheck className="w-5 h-5 text-green-600" />,
       rows: [
         { label: "24/7 Service", value: (c) => c.services_hub?.is_24_7 },
@@ -115,7 +121,7 @@ export default function Home() {
       ],
     },
     {
-      section: "Amenities & Tech",
+      section: "Amenities",
       icon: <Truck className="w-5 h-5 text-orange-600" />,
       rows: [
         { label: "Showers", value: (c) => c.amenities_detailed?.showers },
@@ -128,88 +134,64 @@ export default function Home() {
         { label: "Wi-Fi", value: (c) => c.amenities_detailed?.wifi },
       ],
     },
-    {
-      section: "Support & App",
-      icon: <Smartphone className="w-5 h-5 text-purple-600" />,
-      rows: [
-        { label: "Mobile App", value: (c) => c.app_info?.app_name || "N/A" },
-        { label: "Main Phone", value: (c) => c.contact?.main_phone || "N/A" },
-        {
-          label: "Rewards",
-          value: (c) => c.loyalty_program?.program_name || "None",
-        },
-      ],
-    },
   ];
-
-  const renderValue = (val) => {
-    if (val === true)
-      return <Check className="w-5 h-5 text-green-500 mx-auto" />;
-    if (val === false || val === undefined || val === null)
-      return <span className="text-slate-300">—</span>;
-    return <span className="text-sm font-medium text-slate-700">{val}</span>;
-  };
-  const getLogoUrl = (company) => {
-    return `https://ui-avatars.com/api/?name=${company.name}&background=random&color=fff&size=128&font-size=0.33`;
-  };
 
   return (
     <Layout>
-      <section className="relative bg-gradient-to-b from-slate-50 via-white to-white pt-20 pb-24 px-4 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-100/50 rounded-full blur-3xl -z-10" />
-        <div className="container mx-auto text-center max-w-4xl">
+      <section className="relative bg-gradient-to-b from-slate-50 via-white to-white pt-24 pb-20 px-4 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-100/40 rounded-full blur-[100px] -z-10" />
+        <div className="container mx-auto text-center max-w-3xl">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
             className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-6 tracking-tight"
           >
-            Find the Best{" "}
+            Find Top{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-              Trucking Services
+              Truck Services
             </span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto"
+            transition={{ delay: 0.1 }}
+            className="text-lg text-slate-600 mb-10 leading-relaxed"
           >
-            Compare 15+ top service providers, truck stops, and fleet
-            maintenance companies instantly.
+            Compare the best truck stops, fleet maintenance, and repair services
+            across the USA.
           </motion.p>
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="relative max-w-2xl mx-auto group"
+            transition={{ delay: 0.2 }}
+            className="relative max-w-xl mx-auto group z-20"
           >
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-            <div className="relative bg-white rounded-full shadow-xl flex items-center p-2">
+            <div className="relative bg-white rounded-full shadow-xl shadow-blue-900/5 flex items-center p-2 border border-slate-100">
               <div className="pl-4 text-slate-400">
-                <Search className="w-6 h-6" />
+                <Search className="w-5 h-5" />
               </div>
               <input
                 type="text"
-                placeholder="Search companies (e.g. Love's, Penske)..."
-                className="w-full px-4 py-3 rounded-full outline-none text-lg text-slate-700 placeholder:text-slate-400 bg-transparent"
+                placeholder="Search services (e.g. Love's, Oil Change)..."
+                className="w-full px-4 py-3 rounded-full outline-none text-base text-slate-700 placeholder:text-slate-400 bg-transparent"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </motion.div>
         </div>
       </section>
-      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 py-4">
-        <div className="container mx-auto px-4 overflow-x-auto">
-          <div className="flex justify-center min-w-max gap-2">
+      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-xl border-b border-slate-100 py-3">
+        <div className="container mx-auto px-4 overflow-x-auto no-scrollbar">
+          <div className="flex justify-center min-w-max gap-2 px-2">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 border ${
                   activeCategory === cat
-                    ? "bg-slate-900 text-white shadow-lg transform scale-105"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    ? "bg-slate-900 text-white border-slate-900 shadow-md transform scale-105"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                 }`}
               >
                 {cat}
@@ -218,28 +200,27 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {isLoading ? (
-        <div className="flex justify-center items-center py-32">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      ) : (
-        <div className="container mx-auto px-4 py-12 pb-32">
+      <div className="container mx-auto px-4 py-12 pb-32">
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <CompanyCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
           <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
+            layout
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               {visibleCompanies.length > 0 ? (
                 visibleCompanies.map((company) => (
-                  <div key={company.id}>
-                    <CompanyCard
-                      company={company}
-                      isSelected={selectedIds.includes(company.id)}
-                      toggleSelection={toggleSelection}
-                    />
-                  </div>
+                  <CompanyCard
+                    key={company.id}
+                    company={company}
+                    isSelected={selectedIds.includes(company.id)}
+                    toggleSelection={toggleSelection}
+                  />
                 ))
               ) : (
                 <motion.div
@@ -247,34 +228,36 @@ export default function Home() {
                   animate={{ opacity: 1 }}
                   className="col-span-full text-center py-20"
                 >
-                  <div className="inline-flex bg-slate-100 p-6 rounded-full mb-4">
-                    <Search className="w-10 h-10 text-slate-400" />
+                  <div className="inline-flex bg-slate-50 p-6 rounded-full mb-4">
+                    <Search className="w-10 h-10 text-slate-300" />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-700">
-                    No results found
+                  <h3 className="text-xl font-bold text-slate-700">
+                    No services found
                   </h3>
                   <p className="text-slate-500 mt-2">
-                    Try adjusting your search or filter.
+                    Try changing your search term.
                   </p>
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
-        </div>
-      )}
+        )}
+      </div>
       <AnimatePresence>
         {selectedIds.length > 0 && (
           <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white p-2 pl-6 pr-2 rounded-full shadow-2xl z-40 flex items-center gap-6 max-w-md w-[90%] backdrop-blur-xl border border-slate-700"
+            className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur-lg text-white p-2 pl-6 pr-2 rounded-full shadow-2xl z-40 flex items-center gap-6 max-w-md w-[90%] border border-white/10"
           >
             <div className="flex flex-col">
               <span className="font-bold text-sm">
                 {selectedIds.length} Selected
               </span>
-              <span className="text-xs text-slate-400">Ready to compare</span>
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                To Compare
+              </span>
             </div>
             <div className="flex gap-2 ml-auto">
               <button
@@ -285,9 +268,9 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setIsComparing(true)}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg shadow-blue-900/50 transition-transform active:scale-95 flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-full text-xs font-bold shadow-lg shadow-blue-600/30 transition-transform active:scale-95 flex items-center gap-2"
               >
-                Compare <ChevronRight size={16} />
+                Compare <ChevronRight size={14} />
               </button>
             </div>
           </motion.div>
@@ -299,34 +282,27 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 overflow-auto"
+            className="fixed inset-0 bg-white/95 backdrop-blur-md z-50 overflow-auto"
           >
             <div className="container mx-auto px-4 py-8">
-              <div className="flex justify-between items-center mb-8 sticky top-0 bg-white/80 backdrop-blur py-4 border-b z-20">
+              <div className="flex justify-between items-center mb-8 sticky top-0 bg-white/90 backdrop-blur py-4 border-b z-20">
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900">
-                    Feature Comparison
+                    Compare Services
                   </h2>
-                  <p className="text-slate-500 text-sm">
-                    Side-by-side analysis
-                  </p>
                 </div>
                 <button
                   onClick={() => setIsComparing(false)}
-                  className="bg-slate-100 p-2 rounded-full hover:bg-slate-200 transition text-slate-600 hover:rotate-90 duration-300"
+                  className="bg-slate-100 p-2 rounded-full hover:bg-slate-200 transition text-slate-600"
                 >
                   <X size={24} />
                 </button>
               </div>
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="overflow-x-auto pb-20 rounded-2xl border border-slate-200 shadow-xl bg-white"
-              >
-                <table className="w-full min-w-[900px]">
+              <div className="overflow-x-auto pb-20 rounded-2xl border border-slate-200 shadow-xl bg-white">
+                <table className="w-full min-w-[800px]">
                   <thead>
                     <tr>
-                      <th className="w-1/4 p-6 text-left text-slate-400 font-medium bg-slate-50/50 sticky left-0 z-10 border-b">
+                      <th className="w-1/4 p-6 text-left text-slate-400 font-medium bg-slate-50/50 sticky left-0 z-10 border-b border-r">
                         Features
                       </th>
                       {selectedCompanies.map((company) => (
@@ -338,20 +314,11 @@ export default function Home() {
                             <img
                               src={getLogoUrl(company)}
                               alt={company.name}
-                              className="h-12 w-auto mb-3 object-contain"
+                              className="h-10 w-auto mb-3 object-contain"
                             />
-                            <h3 className="font-bold text-slate-900 text-lg">
+                            <h3 className="font-bold text-slate-900 text-sm">
                               {company.name}
                             </h3>
-                            <div className="flex items-center gap-1 text-xs text-slate-500 mt-1 mb-3">
-                              <Users size={12} /> {company.category}
-                            </div>
-                            <Link
-                              to={`/company/${company.id}`}
-                              className="text-xs font-bold bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 flex items-center gap-1 transition-colors"
-                            >
-                              Full Details <ArrowRight size={12} />
-                            </Link>
                           </div>
                         </th>
                       ))}
@@ -363,19 +330,14 @@ export default function Home() {
                         <tr className="bg-slate-50/80">
                           <td
                             colSpan={selectedCompanies.length + 1}
-                            className="p-4 py-3 sticky left-0 z-10 bg-slate-50/90 backdrop-blur-sm border-y border-slate-200"
+                            className="p-3 pl-6 sticky left-0 z-10 bg-slate-50/95 backdrop-blur-sm font-bold text-xs uppercase text-slate-500 tracking-wider"
                           >
-                            <div className="flex items-center gap-2 font-bold text-slate-800 uppercase tracking-wider text-xs">
-                              {section.icon} {section.section}
-                            </div>
+                            {section.section}
                           </td>
                         </tr>
                         {section.rows.map((row, rIdx) => (
-                          <tr
-                            key={rIdx}
-                            className="hover:bg-blue-50/30 transition-colors"
-                          >
-                            <td className="p-4 text-sm font-medium text-slate-600 sticky left-0 bg-white z-10 border-r border-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                          <tr key={rIdx} className="hover:bg-blue-50/20">
+                            <td className="p-4 text-sm font-semibold text-slate-600 sticky left-0 bg-white z-10 border-r border-slate-100">
                               {row.label}
                             </td>
                             {selectedCompanies.map((company) => (
@@ -392,7 +354,7 @@ export default function Home() {
                     ))}
                   </tbody>
                 </table>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         )}

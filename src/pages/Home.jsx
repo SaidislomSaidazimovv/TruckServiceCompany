@@ -19,6 +19,8 @@ import {
   CreditCard,
 } from "lucide-react";
 
+import HomeImage from "../assets/home_img.png";
+
 export default function Home() {
   const [companies, setCompanies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -196,13 +198,33 @@ export default function Home() {
 
   return (
     <Layout>
-      <section className="relative bg-gradient-to-b from-slate-50 via-white to-white pt-24 pb-20 px-4 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-100/40 rounded-full blur-[100px] -z-10" />
-        <div className="container mx-auto text-center max-w-3xl">
+      <section className="relative pt-32 pb-24 px-4 overflow-hidden min-h-[650px] flex flex-col justify-center items-center isolate">
+        <div className="absolute inset-0 -z-20 w-full h-full">
+          <motion.img
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 10, ease: "linear" }}
+            src={HomeImage}
+            alt="Truck Services Background"
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
+        <div className="absolute inset-0 -z-10 bg-white/40 backdrop-blur-[1px]"></div>
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/20 via-white/40 to-white/90"></div>
+        <div className="container mx-auto text-center max-w-4xl relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="inline-block mb-4 px-4 py-1.5 rounded-full bg-blue-50/90 backdrop-blur-md border border-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider shadow-sm"
+          >
+            Nationwide Network Coverage
+          </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-6 tracking-tight"
+            transition={{ delay: 0.2 }}
+            className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight drop-shadow-sm"
           >
             Find Top{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
@@ -212,29 +234,32 @@ export default function Home() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-lg text-slate-600 mb-10 leading-relaxed"
+            transition={{ delay: 0.3 }}
+            className="text-lg md:text-xl text-slate-800 mb-10 leading-relaxed max-w-2xl mx-auto font-medium"
           >
             Compare the best truck stops, fleet maintenance, and repair services
-            across the USA.
+            across the USA with our interactive directory.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.4 }}
             className="relative max-w-xl mx-auto group z-20"
           >
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-            <div className="relative bg-white rounded-full shadow-xl shadow-blue-900/5 flex items-center p-2 border border-slate-100">
+            <div className="relative bg-white rounded-full shadow-2xl shadow-blue-900/10 flex items-center p-2 border border-slate-200">
               <div className="pl-4 text-slate-400">
-                <Search className="w-5 h-5" />
+                <Search className="w-6 h-6" />
               </div>
               <input
                 type="text"
                 placeholder="Search services (e.g. Love's, Towing, Tire)..."
-                className="w-full px-4 py-3 rounded-full outline-none text-base text-slate-700 placeholder:text-slate-400 bg-transparent"
+                className="w-full px-4 py-3.5 rounded-full outline-none text-lg text-slate-700 placeholder:text-slate-400 bg-transparent"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              <button className="hidden sm:block bg-slate-900 text-white px-6 py-2.5 rounded-full font-bold hover:bg-blue-600 transition-colors shadow-lg">
+                Search
+              </button>
             </div>
           </motion.div>
         </div>

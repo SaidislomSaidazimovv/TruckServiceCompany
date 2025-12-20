@@ -1,15 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  Star,
-  Trash2,
-  Plus,
-  ArrowRight,
-  Check,
-  Zap,
-  Users,
-} from "lucide-react";
+import { Star, Trash2, Plus, ArrowRight, Check, Zap } from "lucide-react";
 
 const REAL_RATINGS = {
   1: 4.5,
@@ -32,12 +24,12 @@ const REAL_RATINGS = {
 export default function CompanyCard({ company, isSelected, toggleSelection }) {
   const logoUrl = `https://ui-avatars.com/api/?name=${company.name}&background=random&color=fff&size=128&font-size=0.33`;
   const description =
-    company.slogan ||
-    company.description ||
-    "Trusted service provider for trucking fleets.";
+    company.slogan || "Trusted service provider for trucking fleets.";
+
   const services = Array.isArray(company.services_hub?.primary_services)
     ? company.services_hub.primary_services
-    : ["General Service", "Support"];
+    : ["General Service"];
+
   const rating = REAL_RATINGS[company.id] || 4.0;
   const category = company.category?.split("&")[0] || "Service";
 

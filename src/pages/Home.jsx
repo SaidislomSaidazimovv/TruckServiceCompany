@@ -11,12 +11,12 @@ import {
   BarChart3,
   ShieldCheck,
   Truck,
-  Smartphone,
-  Users,
   ArrowRight,
   Check,
   ChevronRight,
   Zap,
+  Wrench,
+  CreditCard,
 } from "lucide-react";
 
 export default function Home() {
@@ -87,8 +87,30 @@ export default function Home() {
   const renderValue = (val) => {
     if (val === true)
       return <Check className="w-5 h-5 text-green-500 mx-auto" />;
-    if (val === false || val === undefined || val === null)
+    if (val === false) return <X className="w-5 h-5 text-red-300 mx-auto" />;
+    if (val === undefined || val === null)
       return <span className="text-slate-300">—</span>;
+
+    if (Array.isArray(val)) {
+      return (
+        <div className="flex flex-wrap justify-center gap-1">
+          {val.slice(0, 3).map((v, i) => (
+            <span
+              key={i}
+              className="text-[10px] bg-slate-100 px-2 py-1 rounded-full text-slate-600 border border-slate-200 whitespace-nowrap"
+            >
+              {v}
+            </span>
+          ))}
+          {val.length > 3 && (
+            <span className="text-[10px] text-slate-400 self-center">
+              +{val.length - 3}
+            </span>
+          )}
+        </div>
+      );
+    }
+
     return <span className="text-sm font-medium text-slate-700">{val}</span>;
   };
 
@@ -103,11 +125,15 @@ export default function Home() {
           label: "Locations",
           value: (c) => c.metrics?.locations_count || "N/A",
         },
+        {
+          label: "Employees",
+          value: (c) => c.metrics?.employees_count || "N/A",
+        },
       ],
     },
     {
-      section: "Capabilities",
-      icon: <ShieldCheck className="w-5 h-5 text-green-600" />,
+      section: "Technical Services",
+      icon: <Wrench className="w-5 h-5 text-indigo-600" />,
       rows: [
         { label: "24/7 Service", value: (c) => c.services_hub?.is_24_7 },
         {
@@ -118,20 +144,52 @@ export default function Home() {
           label: "Mobile Service",
           value: (c) => c.services_hub?.mobile_service,
         },
+        { label: "Towing", value: (c) => c.services_hub?.towing_service },
+        { label: "Tire Service", value: (c) => c.services_hub?.tire_service },
+        {
+          label: "Trailer Repair",
+          value: (c) => c.services_hub?.trailer_repair,
+        },
+        {
+          label: "Engine Diag",
+          value: (c) => c.services_hub?.engine_diagnostics,
+        },
+        { label: "Welding", value: (c) => c.services_hub?.welding },
       ],
     },
     {
-      section: "Amenities",
+      section: "Amenities & Comfort",
       icon: <Truck className="w-5 h-5 text-orange-600" />,
       rows: [
-        { label: "Showers", value: (c) => c.amenities_detailed?.showers },
         {
-          label: "Parking",
+          label: "Parking Spots",
           value: (c) =>
             c.amenities_detailed?.parking_spots ||
             c.amenities_detailed?.parking,
         },
+        { label: "Showers", value: (c) => c.amenities_detailed?.showers },
         { label: "Wi-Fi", value: (c) => c.amenities_detailed?.wifi },
+        { label: "Laundry", value: (c) => c.amenities_detailed?.laundry },
+        {
+          label: "Drivers Lounge",
+          value: (c) => c.amenities_detailed?.lounge_area,
+        },
+        {
+          label: "Food Options",
+          value: (c) => c.amenities_detailed?.food_options,
+        },
+      ],
+    },
+    {
+      section: "Financials",
+      icon: <CreditCard className="w-5 h-5 text-green-600" />,
+      rows: [
+        { label: "Payment Methods", value: (c) => c.metrics?.payment_methods },
+        {
+          label: "Loyalty Program",
+          value: (c) => c.program_name || c.loyalty_program?.program_name,
+        },
+        { label: "Warranty", value: (c) => c.services_hub?.warranty_offered },
       ],
     },
   ];
@@ -173,7 +231,7 @@ export default function Home() {
               </div>
               <input
                 type="text"
-                placeholder="Search services (e.g. Love's, Oil Change)..."
+                placeholder="Search services (e.g. Love's, Towing, Tire)..."
                 className="w-full px-4 py-3 rounded-full outline-none text-base text-slate-700 placeholder:text-slate-400 bg-transparent"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -330,9 +388,9 @@ export default function Home() {
                         <tr className="bg-slate-50/80">
                           <td
                             colSpan={selectedCompanies.length + 1}
-                            className="p-3 pl-6 sticky left-0 z-10 bg-slate-50/95 backdrop-blur-sm font-bold text-xs uppercase text-slate-500 tracking-wider"
+                            className="p-3 pl-6 sticky left-0 z-10 bg-slate-50/95 backdrop-blur-sm font-bold text-xs uppercase text-slate-500 tracking-wider flex items-center gap-2"
                           >
-                            {section.section}
+                            {section.icon} {section.section}
                           </td>
                         </tr>
                         {section.rows.map((row, rIdx) => (

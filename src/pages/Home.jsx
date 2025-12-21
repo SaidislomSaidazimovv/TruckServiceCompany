@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { supabase } from "../lib/supabase";
 import Layout from "../components/Layout";
 import CompanyCard from "../components/CompanyCard";
@@ -17,8 +22,13 @@ import {
   Zap,
   Wrench,
   CreditCard,
+  Sparkles,
+  MapPin,
+  Users,
+  Phone,
+  Mail,
+  Clock,
 } from "lucide-react";
-
 import HomeImage from "../assets/home_img.png";
 
 export default function Home() {
@@ -28,6 +38,10 @@ export default function Home() {
   const [isComparing, setIsComparing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+
+  const { scrollYProgress } = useScroll();
+  const yBackground = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   useEffect(() => {
     fetchCompanies();
@@ -40,11 +54,10 @@ export default function Home() {
         .from("companies")
         .select("*")
         .order("id", { ascending: true });
-
       if (error) throw error;
       if (data) setCompanies(data);
     } catch (error) {
-      console.error("Xatolik:", error.message);
+      console.error("Error:", error.message);
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +88,7 @@ export default function Home() {
       setSelectedIds(selectedIds.filter((itemId) => itemId !== id));
     } else {
       if (selectedIds.length >= 3) {
-        alert("Siz birdaniga ko'pi bilan 3 ta kompaniyani solishtira olasiz.");
+        alert("You can compare up to 3 companies at a time.");
         return;
       }
       setSelectedIds([...selectedIds, id]);
@@ -88,24 +101,24 @@ export default function Home() {
 
   const renderValue = (val) => {
     if (val === true)
-      return <Check className="w-5 h-5 text-green-500 mx-auto" />;
-    if (val === false) return <X className="w-5 h-5 text-red-300 mx-auto" />;
+      return <Check className="w-5 h-5 text-emerald-600 mx-auto" />;
+    if (val === false) return <X className="w-5 h-5 text-slate-300 mx-auto" />;
     if (val === undefined || val === null)
-      return <span className="text-slate-300">—</span>;
+      return <span className="text-slate-400">—</span>;
 
     if (Array.isArray(val)) {
       return (
-        <div className="flex flex-wrap justify-center gap-1">
+        <div className="flex flex-wrap justify-center gap-1.5">
           {val.slice(0, 3).map((v, i) => (
             <span
               key={i}
-              className="text-[10px] bg-slate-100 px-2 py-1 rounded-full text-slate-600 border border-slate-200 whitespace-nowrap"
+              className="text-xs bg-slate-100 px-2.5 py-1 rounded-md text-slate-700 font-medium"
             >
               {v}
             </span>
           ))}
           {val.length > 3 && (
-            <span className="text-[10px] text-slate-400 self-center">
+            <span className="text-xs text-slate-500 self-center font-semibold">
               +{val.length - 3}
             </span>
           )}
@@ -113,13 +126,13 @@ export default function Home() {
       );
     }
 
-    return <span className="text-sm font-medium text-slate-700">{val}</span>;
+    return <span className="text-sm font-semibold text-slate-800">{val}</span>;
   };
 
   const comparisonRows = [
     {
       section: "Overview",
-      icon: <BarChart3 className="w-5 h-5 text-blue-600" />,
+      icon: <BarChart3 className="w-5 h-5" />,
       rows: [
         { label: "Founded", value: (c) => c.founded_year },
         { label: "Ownership", value: (c) => c.metrics?.ownership || "Private" },
@@ -135,7 +148,7 @@ export default function Home() {
     },
     {
       section: "Technical Services",
-      icon: <Wrench className="w-5 h-5 text-indigo-600" />,
+      icon: <Wrench className="w-5 h-5" />,
       rows: [
         { label: "24/7 Service", value: (c) => c.services_hub?.is_24_7 },
         {
@@ -161,7 +174,7 @@ export default function Home() {
     },
     {
       section: "Amenities & Comfort",
-      icon: <Truck className="w-5 h-5 text-orange-600" />,
+      icon: <Truck className="w-5 h-5" />,
       rows: [
         {
           label: "Parking Spots",
@@ -184,7 +197,7 @@ export default function Home() {
     },
     {
       section: "Financials",
-      icon: <CreditCard className="w-5 h-5 text-green-600" />,
+      icon: <CreditCard className="w-5 h-5" />,
       rows: [
         { label: "Payment Methods", value: (c) => c.metrics?.payment_methods },
         {
@@ -198,83 +211,117 @@ export default function Home() {
 
   return (
     <Layout>
-      <section className="relative pt-32 pb-24 px-4 overflow-hidden min-h-[650px] flex flex-col justify-center items-center isolate">
-        <div className="absolute inset-0 -z-20 w-full h-full">
-          <motion.img
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 10, ease: "linear" }}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          style={{ y: yBackground, opacity }}
+        >
+          <div className="absolute inset-0 bg-slate-900/70 z-10" />
+          <img
             src={HomeImage}
-            alt="Truck Services Background"
-            className="w-full h-full object-cover object-center"
+            alt="Truck Services"
+            className="w-full h-full object-cover"
           />
-        </div>
-        <div className="absolute inset-0 -z-10 bg-white/40 backdrop-blur-[1px]"></div>
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/20 via-white/40 to-white/90"></div>
-        <div className="container mx-auto text-center max-w-4xl relative z-10">
+        </motion.div>
+        <div className="relative z-20 container mx-auto px-4 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="inline-block mb-4 px-4 py-1.5 rounded-full bg-blue-50/90 backdrop-blur-md border border-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider shadow-sm"
+            transition={{ duration: 0.8 }}
+            className="max-w-5xl mx-auto"
           >
-            Nationwide Network Coverage
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight drop-shadow-sm"
-          >
-            Find Top{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-              Truck Services
-            </span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-lg md:text-xl text-slate-800 mb-10 leading-relaxed max-w-2xl mx-auto font-medium"
-          >
-            Compare the best truck stops, fleet maintenance, and repair services
-            across the USA with our interactive directory.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 }}
-            className="relative max-w-xl mx-auto group z-20"
-          >
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-            <div className="relative bg-white rounded-full shadow-2xl shadow-blue-900/10 flex items-center p-2 border border-slate-200">
-              <div className="pl-4 text-slate-400">
-                <Search className="w-6 h-6" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="mb-6"
+            >
+              <span className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 text-orange-400 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
+                <Sparkles className="w-4 h-4" />
+                Trusted by 10,000+ Drivers
+              </span>
+            </motion.div>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight">
+              Professional Truck
+              <br />
+              <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+                Services Directory
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
+              Find and compare the best truck stops, maintenance services, and
+              repair facilities nationwide
+            </p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="max-w-3xl mx-auto"
+            >
+              <div className="relative bg-white rounded-2xl shadow-2xl shadow-slate-900/50 overflow-hidden">
+                <div className="flex items-stretch">
+                  <div className="flex items-center pl-6 pr-4">
+                    <Search className="w-6 h-6 text-slate-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search for services, locations, or companies..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1 py-5 pr-4 text-lg text-slate-800 placeholder:text-slate-400 outline-none bg-transparent"
+                  />
+                  <button className="hidden md:flex items-center gap-2 bg-orange-500 text-white px-8 py-5 font-bold hover:bg-orange-600 transition-all duration-300">
+                    <span>Search</span>
+                  </button>
+                </div>
               </div>
-              <input
-                type="text"
-                placeholder="Search services (e.g. Love's, Towing, Tire)..."
-                className="w-full px-4 py-3.5 rounded-full outline-none text-lg text-slate-700 placeholder:text-slate-400 bg-transparent"
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <button className="hidden sm:block bg-slate-900 text-white px-6 py-2.5 rounded-full font-bold hover:bg-blue-600 transition-colors shadow-lg">
-                Search
+              <button className="md:hidden w-full mt-4 flex items-center justify-center gap-2 bg-orange-500 text-white px-8 py-4 rounded-2xl font-bold hover:bg-orange-600 transition-all">
+                <span>Search</span>
+                <ArrowRight className="w-5 h-5" />
               </button>
-            </div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.6 }}
+                className="mt-8 flex flex-wrap justify-center gap-6 text-sm"
+              >
+                <div className="flex items-center gap-2 text-slate-400">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                  <span>500+ Verified Services</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-400">
+                  <Clock className="w-4 h-4" />
+                  <span>24/7 Support Available</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-400">
+                  <Users className="w-4 h-4" />
+                  <span>50K+ Happy Drivers</span>
+                </div>
+              </motion.div>
+            </motion.div>
           </motion.div>
         </div>
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
+        >
+          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center pt-2">
+            <div className="w-1 h-3 bg-white/50 rounded-full" />
+          </div>
+        </motion.div>
       </section>
-      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-xl border-b border-slate-100 py-3">
-        <div className="container mx-auto px-4 overflow-x-auto no-scrollbar">
-          <div className="flex justify-center min-w-max gap-2 px-2">
+      <div className="sticky top-[73px] z-30 bg-white border-b border-slate-200 shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-4 overflow-x-auto py-4 scrollbar-hide">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 border ${
+                className={`px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
                   activeCategory === cat
-                    ? "bg-slate-900 text-white border-slate-900 shadow-md transform scale-105"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                    ? "bg-orange-500 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
               >
                 {cat}
@@ -283,78 +330,121 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="container mx-auto px-4 py-12 pb-32">
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <CompanyCardSkeleton key={i} />
-            ))}
+      <div className="bg-slate-50 py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              Browse Services
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Explore our comprehensive directory of professional truck services
+            </p>
           </div>
-        ) : (
-          <motion.div
-            layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            <AnimatePresence mode="popLayout">
-              {visibleCompanies.length > 0 ? (
-                visibleCompanies.map((company) => (
-                  <CompanyCard
-                    key={company.id}
-                    company={company}
-                    isSelected={selectedIds.includes(company.id)}
-                    toggleSelection={toggleSelection}
-                  />
-                ))
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="col-span-full text-center py-20"
-                >
-                  <div className="inline-flex bg-slate-50 p-6 rounded-full mb-4">
-                    <Search className="w-10 h-10 text-slate-300" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-700">
-                    No services found
-                  </h3>
-                  <p className="text-slate-500 mt-2">
-                    Try changing your search term.
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        )}
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <CompanyCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              layout
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
+              <AnimatePresence mode="popLayout">
+                {visibleCompanies.length > 0 ? (
+                  visibleCompanies.map((company) => (
+                    <motion.div
+                      key={company.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      className="h-full"
+                    >
+                      <CompanyCard
+                        company={company}
+                        isSelected={selectedIds.includes(company.id)}
+                        toggleSelection={toggleSelection}
+                      />
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="col-span-full text-center py-20"
+                  >
+                    <Search className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                    <h3 className="text-2xl font-bold text-slate-700 mb-2">
+                      No services found
+                    </h3>
+                    <p className="text-slate-500">
+                      Try adjusting your search or filters
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </div>
       </div>
+      <section className="bg-slate-900 text-white py-20">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Need Help Finding the Right Service?
+          </h2>
+          <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+            Our team is here to assist you 24/7
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <a
+              href="tel:1-800-TRUCK-SERVICE"
+              className="flex items-center gap-2 bg-orange-500 text-white px-8 py-4 rounded-lg font-bold hover:bg-orange-600 transition-colors"
+            >
+              <Phone size={20} />
+              1-800-TRUCK-SERVICE
+            </a>
+            <a
+              href="mailto:info@truckservices.com"
+              className="flex items-center gap-2 bg-white text-slate-900 px-8 py-4 rounded-lg font-bold hover:bg-slate-100 transition-colors"
+            >
+              <Mail size={20} />
+              Email Us
+            </a>
+          </div>
+        </div>
+      </section>
       <AnimatePresence>
         {selectedIds.length > 0 && (
           <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur-lg text-white p-2 pl-6 pr-2 rounded-full shadow-2xl z-40 flex items-center gap-6 max-w-md w-[90%] border border-white/10"
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
           >
-            <div className="flex flex-col">
-              <span className="font-bold text-sm">
-                {selectedIds.length} Selected
-              </span>
-              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
-                To Compare
-              </span>
-            </div>
-            <div className="flex gap-2 ml-auto">
-              <button
-                onClick={() => setSelectedIds([])}
-                className="px-4 py-2 rounded-full text-xs font-bold text-slate-400 hover:text-white transition"
-              >
-                Clear
-              </button>
-              <button
-                onClick={() => setIsComparing(true)}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-full text-xs font-bold shadow-lg shadow-blue-600/30 transition-transform active:scale-95 flex items-center gap-2"
-              >
-                Compare <ChevronRight size={14} />
-              </button>
+            <div className="bg-slate-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6 border border-slate-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-lg">
+                  {selectedIds.length}
+                </div>
+                <span className="font-semibold">Selected</span>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setSelectedIds([])}
+                  className="px-4 py-2 rounded-full text-sm font-semibold hover:bg-slate-800 transition-colors"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={() => setIsComparing(true)}
+                  className="flex items-center gap-2 bg-orange-500 px-6 py-2 rounded-full text-sm font-bold hover:bg-orange-600 transition-colors"
+                >
+                  Compare Now
+                  <ChevronRight size={16} />
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -365,68 +455,76 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white/95 backdrop-blur-md z-50 overflow-auto"
+            className="fixed inset-0 bg-white z-50 overflow-auto"
           >
             <div className="container mx-auto px-4 py-8">
-              <div className="flex justify-between items-center mb-8 sticky top-0 bg-white/90 backdrop-blur py-4 border-b z-20">
+              <div className="flex justify-between items-center mb-8 pb-6 border-b border-slate-200">
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900">
-                    Compare Services
+                  <h2 className="text-3xl font-bold text-slate-900">
+                    Service Comparison
                   </h2>
+                  <p className="text-slate-600 mt-1">
+                    {selectedCompanies.length} companies selected
+                  </p>
                 </div>
                 <button
                   onClick={() => setIsComparing(false)}
-                  className="bg-slate-100 p-2 rounded-full hover:bg-slate-200 transition text-slate-600"
+                  className="p-3 hover:bg-slate-100 rounded-lg transition-colors"
                 >
-                  <X size={24} />
+                  <X size={24} className="text-slate-600" />
                 </button>
               </div>
-              <div className="overflow-x-auto pb-20 rounded-2xl border border-slate-200 shadow-xl bg-white">
-                <table className="w-full min-w-[800px]">
+              <div className="overflow-x-auto rounded-lg border border-slate-200">
+                <table className="w-full min-w-[900px] bg-white">
                   <thead>
-                    <tr>
-                      <th className="w-1/4 p-6 text-left text-slate-400 font-medium bg-slate-50/50 sticky left-0 z-10 border-b border-r">
+                    <tr className="border-b border-slate-200">
+                      <th className="w-64 p-6 text-left bg-slate-50 font-bold text-slate-700 sticky left-0 z-10">
                         Features
                       </th>
                       {selectedCompanies.map((company) => (
-                        <th
-                          key={company.id}
-                          className="w-1/4 p-6 align-top border-b border-l border-slate-100"
-                        >
-                          <div className="flex flex-col items-center text-center">
-                            <img
-                              src={getLogoUrl(company)}
-                              alt={company.name}
-                              className="h-10 w-auto mb-3 object-contain"
-                            />
-                            <h3 className="font-bold text-slate-900 text-sm">
+                        <th key={company.id} className="p-6 bg-slate-50">
+                          <div className="flex flex-col items-center">
+                            <div className="w-16 h-16 bg-white rounded-lg p-2 mb-3 shadow-sm border border-slate-100">
+                              <img
+                                src={getLogoUrl(company)}
+                                alt={company.name}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                            <div className="font-bold text-slate-900 text-center">
                               {company.name}
-                            </h3>
+                            </div>
                           </div>
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody>
                     {comparisonRows.map((section, idx) => (
                       <React.Fragment key={idx}>
-                        <tr className="bg-slate-50/80">
+                        <tr className="bg-slate-50">
                           <td
                             colSpan={selectedCompanies.length + 1}
-                            className="p-3 pl-6 sticky left-0 z-10 bg-slate-50/95 backdrop-blur-sm font-bold text-xs uppercase text-slate-500 tracking-wider flex items-center gap-2"
+                            className="p-4 sticky left-0 z-10"
                           >
-                            {section.icon} {section.section}
+                            <div className="flex items-center gap-2 text-slate-700 font-bold">
+                              {section.icon}
+                              <span>{section.section}</span>
+                            </div>
                           </td>
                         </tr>
                         {section.rows.map((row, rIdx) => (
-                          <tr key={rIdx} className="hover:bg-blue-50/20">
-                            <td className="p-4 text-sm font-semibold text-slate-600 sticky left-0 bg-white z-10 border-r border-slate-100">
+                          <tr
+                            key={rIdx}
+                            className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                          >
+                            <td className="p-4 font-semibold text-slate-700 sticky left-0 bg-white z-10">
                               {row.label}
                             </td>
                             {selectedCompanies.map((company) => (
                               <td
                                 key={company.id}
-                                className="p-4 text-center border-l border-slate-50"
+                                className="p-4 text-center border-l border-slate-100"
                               >
                                 {renderValue(row.value(company))}
                               </td>

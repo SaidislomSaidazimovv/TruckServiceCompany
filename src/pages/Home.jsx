@@ -28,6 +28,7 @@ import {
   Phone,
   Mail,
   Clock,
+  Trash2,
 } from "lucide-react";
 import HomeImage from "../assets/home_img.png";
 
@@ -95,6 +96,14 @@ export default function Home() {
     }
   };
 
+  const removeFromComparison = (id) => {
+    const newSelection = selectedIds.filter((itemId) => itemId !== id);
+    setSelectedIds(newSelection);
+    if (newSelection.length === 0) {
+      setIsComparing(false);
+    }
+  };
+
   const getLogoUrl = (company) => {
     return `https://ui-avatars.com/api/?name=${company.name}&background=random&color=fff&size=128&font-size=0.33`;
   };
@@ -112,7 +121,7 @@ export default function Home() {
           {val.slice(0, 3).map((v, i) => (
             <span
               key={i}
-              className="text-xs bg-slate-100 px-2.5 py-1 rounded-md text-slate-700 font-medium"
+              className="text-xs bg-slate-100 px-2.5 py-1 rounded-md text-slate-700 font-medium whitespace-nowrap"
             >
               {v}
             </span>
@@ -340,7 +349,6 @@ export default function Home() {
               Explore our comprehensive directory of professional truck services
             </p>
           </div>
-
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -421,27 +429,42 @@ export default function Home() {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-lg"
           >
-            <div className="bg-slate-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6 border border-slate-700">
+            <div className="bg-slate-900/95 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-white/10 ring-1 ring-black/5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-lg">
-                  {selectedIds.length}
+                <div className="relative">
+                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold text-lg shadow-lg shadow-orange-500/30">
+                    {selectedIds.length}
+                  </div>
+                  {selectedIds.length < 2 && (
+                    <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-slate-900 animate-pulse"></span>
+                  )}
                 </div>
-                <span className="font-semibold">Selected</span>
+                <div className="flex flex-col">
+                  <span className="font-bold text-sm">Companies Selected</span>
+                  <span className="text-xs text-slate-400">
+                    Select at least 2 to compare
+                  </span>
+                </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => setSelectedIds([])}
-                  className="px-4 py-2 rounded-full text-sm font-semibold hover:bg-slate-800 transition-colors"
+                  className="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white transition-colors flex-1 sm:flex-none"
                 >
                   Clear
                 </button>
                 <button
                   onClick={() => setIsComparing(true)}
-                  className="flex items-center gap-2 bg-orange-500 px-6 py-2 rounded-full text-sm font-bold hover:bg-orange-600 transition-colors"
+                  disabled={selectedIds.length < 2}
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    selectedIds.length < 2
+                      ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5"
+                      : "bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-500/25 active:scale-95"
+                  }`}
                 >
-                  Compare Now
+                  Compare
                   <ChevronRight size={16} />
                 </button>
               </div>
@@ -455,86 +478,129 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white z-50 overflow-auto"
+            className="fixed inset-0 bg-white z-[60] overflow-hidden flex flex-col"
           >
-            <div className="container mx-auto px-4 py-8">
-              <div className="flex justify-between items-center mb-8 pb-6 border-b border-slate-200">
+            <div className="container mx-auto px-4 py-4 flex-shrink-0 border-b border-slate-200 bg-white">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-3xl font-bold text-slate-900">
+                  <h2 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
+                    <BarChart3 className="text-orange-500" />
                     Service Comparison
                   </h2>
-                  <p className="text-slate-600 mt-1">
-                    {selectedCompanies.length} companies selected
+                  <p className="text-slate-500 text-sm mt-1">
+                    Comparing{" "}
+                    <span className="font-bold text-slate-900">
+                      {selectedCompanies.length}
+                    </span>{" "}
+                    companies side-by-side
                   </p>
                 </div>
-                <button
-                  onClick={() => setIsComparing(false)}
-                  className="p-3 hover:bg-slate-100 rounded-lg transition-colors"
-                >
-                  <X size={24} className="text-slate-600" />
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSelectedIds([])}
+                    className="text-slate-500 hover:text-red-500 font-medium text-sm px-4 py-2"
+                  >
+                    Clear All
+                  </button>
+                  <button
+                    onClick={() => setIsComparing(false)}
+                    className="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
+                  >
+                    <X size={20} className="text-slate-700" />
+                  </button>
+                </div>
               </div>
-              <div className="overflow-x-auto rounded-lg border border-slate-200">
-                <table className="w-full min-w-[900px] bg-white">
-                  <thead>
-                    <tr className="border-b border-slate-200">
-                      <th className="w-64 p-6 text-left bg-slate-50 font-bold text-slate-700 sticky left-0 z-10">
-                        Features
-                      </th>
-                      {selectedCompanies.map((company) => (
-                        <th key={company.id} className="p-6 bg-slate-50">
-                          <div className="flex flex-col items-center">
-                            <div className="w-16 h-16 bg-white rounded-lg p-2 mb-3 shadow-sm border border-slate-100">
-                              <img
-                                src={getLogoUrl(company)}
-                                alt={company.name}
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                            <div className="font-bold text-slate-900 text-center">
-                              {company.name}
-                            </div>
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {comparisonRows.map((section, idx) => (
-                      <React.Fragment key={idx}>
-                        <tr className="bg-slate-50">
-                          <td
-                            colSpan={selectedCompanies.length + 1}
-                            className="p-4 sticky left-0 z-10"
-                          >
-                            <div className="flex items-center gap-2 text-slate-700 font-bold">
-                              {section.icon}
-                              <span>{section.section}</span>
-                            </div>
-                          </td>
+            </div>
+
+            <div className="flex-1 overflow-auto bg-slate-50/50 p-0 md:p-6">
+              <div className="container mx-auto">
+                <div className="bg-white md:rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+                  <div className="overflow-auto max-h-[calc(100vh-140px)]">
+                    <table className="w-full text-left border-collapse">
+                      <thead className="sticky top-0 z-40 bg-white shadow-sm">
+                        <tr>
+                          <th className="sticky left-0 z-50 bg-white p-4 md:p-6 w-[140px] md:w-64 border-b border-r border-slate-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                              Features
+                            </span>
+                          </th>
+                          {selectedCompanies.map((company) => (
+                            <th
+                              key={company.id}
+                              className="p-4 md:p-6 bg-white min-w-[200px] md:min-w-[280px] border-b border-slate-100 align-top"
+                            >
+                              <div className="flex flex-col items-center relative group">
+                                <button
+                                  onClick={() =>
+                                    removeFromComparison(company.id)
+                                  }
+                                  className="absolute -top-2 -right-2 p-1.5 bg-slate-100 rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 opacity-100" // Mobileda doim ko'rinishi mumkin yoki joyga qarab
+                                  title="Remove from comparison"
+                                >
+                                  <X size={14} />
+                                </button>
+                                <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl p-2 mb-3 shadow-sm border border-slate-100 flex items-center justify-center">
+                                  <img
+                                    src={getLogoUrl(company)}
+                                    alt={company.name}
+                                    className="w-full h-full object-contain"
+                                  />
+                                </div>
+                                <div className="font-bold text-slate-900 text-center text-sm md:text-base leading-tight mb-2">
+                                  {company.name}
+                                </div>
+                                <Link
+                                  to={`/company/${company.id}`}
+                                  className="text-xs font-bold text-orange-500 hover:text-orange-600 flex items-center gap-1"
+                                >
+                                  View Details <ArrowRight size={10} />
+                                </Link>
+                              </div>
+                            </th>
+                          ))}
                         </tr>
-                        {section.rows.map((row, rIdx) => (
-                          <tr
-                            key={rIdx}
-                            className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
-                          >
-                            <td className="p-4 font-semibold text-slate-700 sticky left-0 bg-white z-10">
-                              {row.label}
-                            </td>
-                            {selectedCompanies.map((company) => (
-                              <td
-                                key={company.id}
-                                className="p-4 text-center border-l border-slate-100"
-                              >
-                                {renderValue(row.value(company))}
+                      </thead>
+                      <tbody>
+                        {comparisonRows.map((section, idx) => (
+                          <React.Fragment key={idx}>
+                            <tr className="bg-slate-50/80">
+                              <td className="sticky left-0 z-30 bg-slate-50 p-3 md:p-4 border-b border-r border-slate-200 font-bold text-slate-800 text-sm md:text-base shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+                                <div className="flex items-center gap-2">
+                                  <div className="text-orange-500">
+                                    {section.icon}
+                                  </div>
+                                  <span>{section.section}</span>
+                                </div>
                               </td>
+                              <td
+                                colSpan={selectedCompanies.length}
+                                className="bg-slate-50 border-b border-slate-200"
+                              ></td>
+                            </tr>
+                            {section.rows.map((row, rIdx) => (
+                              <tr
+                                key={rIdx}
+                                className="hover:bg-slate-50/50 transition-colors group"
+                              >
+                                <td className="sticky left-0 z-30 bg-white p-3 md:p-4 text-xs md:text-sm font-semibold text-slate-600 border-b border-r border-slate-100 group-hover:bg-slate-50/50 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+                                  {row.label}
+                                </td>
+                                {selectedCompanies.map((company) => (
+                                  <td
+                                    key={company.id}
+                                    className="p-3 md:p-4 text-center border-b border-l border-slate-100/50 text-sm"
+                                  >
+                                    {renderValue(row.value(company))}
+                                  </td>
+                                ))}
+                              </tr>
                             ))}
-                          </tr>
+                          </React.Fragment>
                         ))}
-                      </React.Fragment>
-                    ))}
-                  </tbody>
-                </table>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>

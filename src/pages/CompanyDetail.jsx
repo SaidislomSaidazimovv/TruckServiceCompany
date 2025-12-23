@@ -22,6 +22,44 @@ import {
   Utensils,
 } from "lucide-react";
 
+const REAL_RATINGS = {
+  1: 4.5,
+  2: 3.9,
+  3: 4.2,
+  4: 4.4,
+  5: 3.8,
+  6: 4.7,
+  7: 4.3,
+  8: 4.1,
+  9: 4.0,
+  10: 4.2,
+  11: 4.6,
+  12: 4.5,
+  13: 4.3,
+  14: 4.4,
+  15: 4.1,
+  16: 4.2,
+  17: 4.6,
+  18: 3.9,
+  19: 4.8,
+  20: 3.7,
+  21: 4.1,
+  22: 4.3,
+  23: 4.0,
+  24: 4.4,
+  25: 4.7,
+  26: 4.5,
+  27: 4.2,
+  28: 4.4,
+  29: 4.1,
+  30: 4.0,
+  31: 4.2,
+  32: 3.5,
+  33: 4.3,
+  34: 4.6,
+  35: 4.0,
+};
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -43,6 +81,8 @@ export default function CompanyDetail() {
   const { id } = useParams();
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const rating = REAL_RATINGS[id] || 4.0;
 
   useEffect(() => {
     async function fetchCompany() {
@@ -182,7 +222,7 @@ export default function CompanyDetail() {
                 </a>
                 <div className="flex items-center gap-2 text-slate-700 font-bold text-lg border border-slate-200 px-5 py-3 rounded-xl bg-white shadow-sm">
                   <Star className="fill-yellow-400 text-yellow-400 w-5 h-5" />
-                  4.8
+                  {rating}
                   <span className="text-slate-400 font-normal text-sm border-l border-slate-200 pl-2 ml-1">
                     Verified
                   </span>
@@ -198,7 +238,6 @@ export default function CompanyDetail() {
             variants={itemVariants}
             className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 overflow-hidden relative"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[100px] -z-0 opacity-50" />
             <h2 className="text-xl font-bold mb-6 flex items-center gap-3 text-slate-900 relative z-10">
               <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
                 <Wrench size={20} />
@@ -234,19 +273,6 @@ export default function CompanyDetail() {
                   </div>
                 );
               })}
-            </div>
-            <div className="sm:col-span-2 mt-2 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100/50 flex gap-4 items-start relative z-10">
-              <Shield className="text-blue-600 shrink-0 mt-0.5" size={20} />
-              <div>
-                <h4 className="font-bold text-blue-900 text-sm mb-1">
-                  Warranty Policy
-                </h4>
-                <p className="text-blue-700 text-sm leading-relaxed opacity-90">
-                  {company.services_hub?.warranty_offered ||
-                    company.services_hub?.warranty_policy ||
-                    "Contact provider for details."}
-                </p>
-              </div>
             </div>
           </motion.section>
           <motion.section
@@ -341,7 +367,6 @@ export default function CompanyDetail() {
         </div>
         <motion.div variants={itemVariants} className="space-y-6">
           <div className="bg-slate-900 text-white rounded-3xl p-8 shadow-2xl ring-1 ring-white/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-blue-600 rounded-full blur-[80px] opacity-20 -z-0"></div>
             <h3 className="text-lg font-bold mb-6 flex items-center gap-3 relative z-10">
               <Briefcase className="text-blue-400" /> Company Metrics
             </h3>

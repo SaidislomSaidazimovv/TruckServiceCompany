@@ -48,6 +48,17 @@ export default function Home() {
     fetchCompanies();
   }, []);
 
+  useEffect(() => {
+    if (isComparing) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isComparing]);
+
   async function fetchCompanies() {
     try {
       setIsLoading(true);
@@ -475,132 +486,145 @@ export default function Home() {
       <AnimatePresence>
         {isComparing && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white z-[60] overflow-hidden flex flex-col"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-white z-[60] flex flex-col overflow-hidden"
           >
-            <div className="container mx-auto px-4 py-4 flex-shrink-0 border-b border-slate-200 bg-white">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
-                    <BarChart3 className="text-orange-500" />
-                    Service Comparison
-                  </h2>
-                  <p className="text-slate-500 text-sm mt-1">
-                    Comparing{" "}
-                    <span className="font-bold text-slate-900">
-                      {selectedCompanies.length}
-                    </span>{" "}
-                    companies side-by-side
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setSelectedIds([])}
-                    className="text-slate-500 hover:text-red-500 font-medium text-sm px-4 py-2"
-                  >
-                    Clear All
-                  </button>
-                  <button
-                    onClick={() => setIsComparing(false)}
-                    className="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
-                  >
-                    <X size={20} className="text-slate-700" />
-                  </button>
+            <div className="flex-shrink-0 bg-white border-b border-slate-200 shadow-sm z-[70] relative">
+              <div className="container mx-auto px-4 py-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 flex items-center gap-2">
+                      <div className="p-2 bg-orange-100 rounded-lg hidden md:block">
+                        <BarChart3 className="text-orange-500 w-5 h-5 md:w-6 md:h-6" />
+                      </div>
+                      Service Comparison
+                    </h2>
+                    <p className="text-slate-500 text-xs md:text-sm mt-1">
+                      Comparing{" "}
+                      <span className="font-bold text-slate-900">
+                        {selectedCompanies.length}
+                      </span>{" "}
+                      providers side-by-side
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
+                    <button
+                      onClick={() => setSelectedIds([])}
+                      className="text-slate-500 hover:text-red-600 font-medium text-xs md:text-sm px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-1"
+                    >
+                      <Trash2 size={14} />
+                      <span className="hidden sm:inline">Clear All</span>
+                      <span className="sm:hidden">Clear</span>
+                    </button>
+                    <button
+                      onClick={() => setIsComparing(false)}
+                      className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all active:scale-95"
+                    >
+                      Close
+                      <X size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div className="flex-1 overflow-auto bg-slate-50/50 p-0 md:p-6">
-              <div className="container mx-auto">
-                <div className="bg-white md:rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
-                  <div className="overflow-auto max-h-[calc(100vh-140px)]">
-                    <table className="w-full text-left border-collapse">
-                      <thead className="sticky top-0 z-40 bg-white shadow-sm">
-                        <tr>
-                          <th className="sticky left-0 z-50 bg-white p-4 md:p-6 w-[140px] md:w-64 border-b border-r border-slate-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                              Features
-                            </span>
-                          </th>
-                          {selectedCompanies.map((company) => (
-                            <th
-                              key={company.id}
-                              className="p-4 md:p-6 bg-white min-w-[200px] md:min-w-[280px] border-b border-slate-100 align-top"
+            <div className="flex-1 overflow-auto bg-slate-50/50 scroll-smooth">
+              <div className="min-w-full inline-block align-middle pb-10">
+                <table className="min-w-full border-collapse">
+                  <thead className="sticky top-0 z-50">
+                    <tr>
+                      <th className="sticky left-0 z-[60] top-0 bg-white p-3 md:p-6 w-[120px] md:w-[240px] border-b border-r border-slate-200 shadow-[4px_0_10px_-4px_rgba(0,0,0,0.05)] align-bottom">
+                        <div className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest pb-1">
+                          Features
+                        </div>
+                        <div className="text-slate-900 font-bold text-sm md:text-xl">
+                          Metrics
+                        </div>
+                      </th>
+                      {selectedCompanies.map((company) => (
+                        <th
+                          key={company.id}
+                          className="bg-white p-3 md:p-6 min-w-[160px] md:min-w-[280px] border-b border-slate-200 align-top relative group"
+                        >
+                          <div className="absolute top-2 right-2 z-10">
+                            <button
+                              onClick={() => removeFromComparison(company.id)}
+                              className="p-1.5 md:p-2 bg-slate-50 text-slate-400 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors"
+                              title="Remove company"
                             >
-                              <div className="flex flex-col items-center relative group">
-                                <button
-                                  onClick={() =>
-                                    removeFromComparison(company.id)
-                                  }
-                                  className="absolute -top-2 -right-2 p-1.5 bg-slate-100 rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 opacity-100" // Mobileda doim ko'rinishi mumkin yoki joyga qarab
-                                  title="Remove from comparison"
-                                >
-                                  <X size={14} />
-                                </button>
-                                <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl p-2 mb-3 shadow-sm border border-slate-100 flex items-center justify-center">
-                                  <img
-                                    src={getLogoUrl(company)}
-                                    alt={company.name}
-                                    className="w-full h-full object-contain"
-                                  />
-                                </div>
-                                <div className="font-bold text-slate-900 text-center text-sm md:text-base leading-tight mb-2">
-                                  {company.name}
-                                </div>
-                                <Link
-                                  to={`/company/${company.id}`}
-                                  className="text-xs font-bold text-orange-500 hover:text-orange-600 flex items-center gap-1"
-                                >
-                                  View Details <ArrowRight size={10} />
-                                </Link>
-                              </div>
-                            </th>
-                          ))}
+                              <X size={14} className="md:w-4 md:h-4" />
+                            </button>
+                          </div>
+                          <div className="flex flex-col items-center pt-2">
+                            <div className="w-12 h-12 md:w-20 md:h-20 bg-white rounded-xl md:rounded-2xl p-2 mb-3 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-slate-100 flex items-center justify-center">
+                              <img
+                                src={getLogoUrl(company)}
+                                alt={company.name}
+                                className="w-full h-full object-contain rounded-lg"
+                              />
+                            </div>
+                            <h3 className="font-bold text-slate-900 text-center text-sm md:text-lg leading-tight mb-2 line-clamp-2 px-2">
+                              {company.name}
+                            </h3>
+                            <Link
+                              to={`/company/${company.id}`}
+                              className="inline-flex items-center gap-1 text-[10px] md:text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors"
+                            >
+                              View Profile <ArrowRight size={10} />
+                            </Link>
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white">
+                    {comparisonRows.map((section, idx) => (
+                      <React.Fragment key={idx}>
+                        <tr className="bg-slate-50/80 sticky z-30">
+                          <td className="sticky left-0 z-40 bg-slate-50 p-3 md:p-4 border-b border-r border-slate-200 shadow-[4px_0_10px_-4px_rgba(0,0,0,0.05)]">
+                            <div className="flex items-center gap-2 font-bold text-slate-700 text-xs md:text-sm uppercase tracking-wide">
+                              <span className="text-orange-500 bg-orange-100 p-1 rounded md:bg-transparent md:p-0">
+                                {React.cloneElement(section.icon, {
+                                  size: 16,
+                                })}
+                              </span>
+                              <span className="hidden md:inline">
+                                {section.section}
+                              </span>
+                              <span className="md:hidden">
+                                {section.section.split(" ")[0]}
+                              </span>
+                            </div>
+                          </td>
+                          <td
+                            colSpan={selectedCompanies.length}
+                            className="bg-slate-50 border-b border-slate-200"
+                          ></td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {comparisonRows.map((section, idx) => (
-                          <React.Fragment key={idx}>
-                            <tr className="bg-slate-50/80">
-                              <td className="sticky left-0 z-30 bg-slate-50 p-3 md:p-4 border-b border-r border-slate-200 font-bold text-slate-800 text-sm md:text-base shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-                                <div className="flex items-center gap-2">
-                                  <div className="text-orange-500">
-                                    {section.icon}
-                                  </div>
-                                  <span>{section.section}</span>
-                                </div>
-                              </td>
+                        {section.rows.map((row, rIdx) => (
+                          <tr
+                            key={rIdx}
+                            className="group hover:bg-slate-50 transition-colors"
+                          >
+                            <td className="sticky left-0 z-30 bg-white group-hover:bg-slate-50 p-3 md:p-5 text-xs md:text-sm font-semibold text-slate-600 border-b border-r border-slate-100 shadow-[4px_0_10px_-4px_rgba(0,0,0,0.05)] break-words">
+                              {row.label}
+                            </td>
+                            {selectedCompanies.map((company) => (
                               <td
-                                colSpan={selectedCompanies.length}
-                                className="bg-slate-50 border-b border-slate-200"
-                              ></td>
-                            </tr>
-                            {section.rows.map((row, rIdx) => (
-                              <tr
-                                key={rIdx}
-                                className="hover:bg-slate-50/50 transition-colors group"
+                                key={company.id}
+                                className="p-3 md:p-5 text-center border-b border-slate-100 text-sm md:text-base align-middle min-w-[160px] md:min-w-[280px]"
                               >
-                                <td className="sticky left-0 z-30 bg-white p-3 md:p-4 text-xs md:text-sm font-semibold text-slate-600 border-b border-r border-slate-100 group-hover:bg-slate-50/50 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-                                  {row.label}
-                                </td>
-                                {selectedCompanies.map((company) => (
-                                  <td
-                                    key={company.id}
-                                    className="p-3 md:p-4 text-center border-b border-l border-slate-100/50 text-sm"
-                                  >
-                                    {renderValue(row.value(company))}
-                                  </td>
-                                ))}
-                              </tr>
+                                {renderValue(row.value(company))}
+                              </td>
                             ))}
-                          </React.Fragment>
+                          </tr>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </motion.div>

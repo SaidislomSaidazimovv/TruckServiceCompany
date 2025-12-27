@@ -14,23 +14,124 @@ import {
   Search,
   X,
   BarChart3,
-  ShieldCheck,
   Truck,
   ArrowRight,
   Check,
   ChevronRight,
-  Zap,
   Wrench,
   CreditCard,
   Sparkles,
-  MapPin,
   Users,
   Phone,
   Mail,
   Clock,
   Trash2,
+  Star,
 } from "lucide-react";
 import HomeImage from "../assets/home_img.png";
+
+const REAL_RATINGS = {
+  1: 4.5,
+  2: 3.9,
+  3: 4.2,
+  4: 4.4,
+  5: 3.8,
+  6: 4.7,
+  7: 4.3,
+  8: 4.1,
+  9: 4.0,
+  10: 4.2,
+  11: 4.6,
+  12: 4.5,
+  13: 4.3,
+  14: 4.4,
+  15: 4.1,
+  16: 4.2,
+  17: 4.6,
+  18: 3.9,
+  19: 4.8,
+  20: 3.7,
+  21: 4.1,
+  22: 4.3,
+  23: 4.0,
+  24: 4.4,
+  25: 4.7,
+  26: 4.5,
+  27: 4.2,
+  28: 4.4,
+  29: 4.1,
+  30: 4.0,
+  31: 4.2,
+  32: 3.5,
+  33: 4.3,
+  34: 4.6,
+  35: 4.0,
+  36: 4.3,
+  37: 4.8,
+  38: 4.5,
+  39: 4.2,
+  40: 4.0,
+  41: 4.1,
+  42: 4.4,
+  43: 4.3,
+  44: 4.2,
+  45: 4.6,
+  46: 4.5,
+  47: 4.1,
+  48: 3.9,
+  49: 4.5,
+  50: 4.6,
+  51: 4.4,
+  52: 4.5,
+  53: 4.0,
+  54: 4.2,
+  55: 4.6,
+  56: 4.3,
+  57: 4.7,
+  58: 4.1,
+  59: 4.2,
+  60: 4.3,
+  61: 4.1,
+  62: 3.8,
+  63: 4.6,
+  64: 4.3,
+  65: 4.4,
+  66: 4.5,
+  67: 4.0,
+  68: 4.7,
+  69: 4.1,
+  70: 4.5,
+  71: 4.7,
+  72: 4.4,
+  73: 4.2,
+  74: 4.6,
+  75: 4.0,
+  76: 4.2,
+  77: 4.4,
+  78: 4.6,
+  79: 4.0,
+  80: 4.1,
+  81: 4.8,
+  82: 4.3,
+  83: 4.1,
+  84: 4.7,
+  85: 4.4,
+  86: 4.0,
+  87: 4.3,
+  88: 4.8,
+  89: 4.5,
+  90: 4.1,
+  91: 4.8,
+  92: 4.6,
+  93: 4.3,
+  94: 4.2,
+  95: 4.5,
+  96: 4.0,
+  97: 4.1,
+  98: 3.8,
+  99: 4.4,
+  100: 4.5,
+};
 
 export default function Home() {
   const [companies, setCompanies] = useState([]);
@@ -76,18 +177,36 @@ export default function Home() {
   }
 
   const categories = useMemo(() => {
-    return ["All", ...new Set(companies.map((c) => c.category || "General"))];
+    return [
+      "All",
+      "Best Rating",
+      ...new Set(companies.map((c) => c.category || "General")),
+    ];
   }, [companies]);
 
   const visibleCompanies = useMemo(() => {
-    return companies.filter((c) => {
+    let filtered = companies.filter((c) => {
       const matchesSearch =
         c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.slogan?.toLowerCase().includes(searchTerm.toLowerCase());
+
       const matchesCategory =
-        activeCategory === "All" || c.category === activeCategory;
+        activeCategory === "All" ||
+        activeCategory === "Best Rating" ||
+        c.category === activeCategory;
+
       return matchesSearch && matchesCategory;
     });
+
+    if (activeCategory === "Best Rating") {
+      filtered.sort((a, b) => {
+        const ratingA = REAL_RATINGS[a.id] || 0;
+        const ratingB = REAL_RATINGS[b.id] || 0;
+        return ratingB - ratingA;
+      });
+    }
+
+    return filtered;
   }, [companies, searchTerm, activeCategory]);
 
   const selectedCompanies = useMemo(() => {
@@ -154,6 +273,7 @@ export default function Home() {
       section: "Overview",
       icon: <BarChart3 className="w-5 h-5" />,
       rows: [
+        { label: "Rating", value: (c) => REAL_RATINGS[c.id] || "N/A" }, // Ratingni comparison ga ham qo'shdik
         { label: "Founded", value: (c) => c.founded_year },
         { label: "Ownership", value: (c) => c.metrics?.ownership || "Private" },
         {
@@ -338,12 +458,21 @@ export default function Home() {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
                   activeCategory === cat
-                    ? "bg-orange-500 text-white"
+                    ? "bg-orange-500 text-white shadow-md shadow-orange-500/25"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
               >
+                {cat === "Best Rating" && (
+                  <Star
+                    className={`w-4 h-4 ${
+                      activeCategory === cat
+                        ? "fill-white"
+                        : "fill-slate-400 text-slate-400"
+                    }`}
+                  />
+                )}
                 {cat}
               </button>
             ))}

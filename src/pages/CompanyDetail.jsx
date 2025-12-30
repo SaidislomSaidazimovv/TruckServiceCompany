@@ -123,6 +123,23 @@ const REAL_RATINGS = {
   98: 3.8,
   99: 4.4,
   100: 4.5,
+  101: 4.6,
+  102: 4.2,
+  103: 4.8,
+  104: 4.1,
+  105: 4.4,
+  106: 4.3,
+  107: 4.0,
+  108: 4.7,
+  109: 4.1,
+  110: 4.2,
+  111: 3.9,
+  112: 4.5,
+  113: 4.3,
+  114: 4.0,
+  115: 4.1,
+  116: 4.6,
+  117: 4.3,
 };
 
 const containerVariants = {
@@ -315,11 +332,10 @@ export default function CompanyDetail() {
                 return (
                   <div
                     key={spec.key}
-                    className={`p-3 rounded-xl border text-center transition-colors ${
-                      isAvail
-                        ? "bg-green-50 border-green-100"
-                        : "bg-slate-50 border-slate-100 opacity-50"
-                    }`}
+                    className={`p-3 rounded-xl border text-center transition-colors ${isAvail
+                      ? "bg-green-50 border-green-100"
+                      : "bg-slate-50 border-slate-100 opacity-50"
+                      }`}
                   >
                     <div className="flex justify-center mb-2">
                       {isAvail ? (
@@ -329,9 +345,8 @@ export default function CompanyDetail() {
                       )}
                     </div>
                     <span
-                      className={`text-xs font-bold ${
-                        isAvail ? "text-green-800" : "text-slate-500"
-                      }`}
+                      className={`text-xs font-bold ${isAvail ? "text-green-800" : "text-slate-500"
+                        }`}
                     >
                       {spec.label}
                     </span>
@@ -384,25 +399,23 @@ export default function CompanyDetail() {
                 return (
                   <div
                     key={key}
-                    className={`p-4 rounded-2xl border text-center transition-all ${
-                      isAvailable
-                        ? "bg-slate-50 border-slate-100"
-                        : "bg-slate-50/50 border-slate-50 opacity-60"
-                    }`}
+                    className={`p-4 rounded-2xl border text-center transition-all ${isAvailable
+                      ? "bg-slate-50 border-slate-100"
+                      : "bg-slate-50/50 border-slate-50 opacity-60"
+                      }`}
                   >
                     <div className="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider mb-2">
                       {key.replace(/_/g, " ")}
                     </div>
                     <div
-                      className={`font-bold text-sm ${
-                        isAvailable ? "text-slate-900" : "text-slate-400"
-                      }`}
+                      className={`font-bold text-sm ${isAvailable ? "text-slate-900" : "text-slate-400"
+                        }`}
                     >
                       {value === true
                         ? "Available"
                         : value === false
-                        ? "Not Available"
-                        : value}
+                          ? "Not Available"
+                          : value}
                     </div>
                   </div>
                 );

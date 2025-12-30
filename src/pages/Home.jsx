@@ -10,6 +10,7 @@ import { supabase } from "../lib/supabase";
 import Layout from "../components/Layout";
 import CompanyCard from "../components/CompanyCard";
 import CompanyCardSkeleton from "../components/CompantCardSkeleton";
+import MapView from "../components/MapView";
 import {
   Search,
   X,
@@ -27,110 +28,25 @@ import {
   Clock,
   Trash2,
   Star,
+  ChevronDown,
+  List,
+  Map as MapIcon
 } from "lucide-react";
 import HomeImage from "../assets/home_img.png";
 
 const REAL_RATINGS = {
-  1: 4.5,
-  2: 3.9,
-  3: 4.2,
-  4: 4.4,
-  5: 3.8,
-  6: 4.7,
-  7: 4.3,
-  8: 4.1,
-  9: 4.0,
-  10: 4.2,
-  11: 4.6,
-  12: 4.5,
-  13: 4.3,
-  14: 4.4,
-  15: 4.1,
-  16: 4.2,
-  17: 4.6,
-  18: 3.9,
-  19: 4.8,
-  20: 3.7,
-  21: 4.1,
-  22: 4.3,
-  23: 4.0,
-  24: 4.4,
-  25: 4.7,
-  26: 4.5,
-  27: 4.2,
-  28: 4.4,
-  29: 4.1,
-  30: 4.0,
-  31: 4.2,
-  32: 3.5,
-  33: 4.3,
-  34: 4.6,
-  35: 4.0,
-  36: 4.3,
-  37: 4.8,
-  38: 4.5,
-  39: 4.2,
-  40: 4.0,
-  41: 4.1,
-  42: 4.4,
-  43: 4.3,
-  44: 4.2,
-  45: 4.6,
-  46: 4.5,
-  47: 4.1,
-  48: 3.9,
-  49: 4.5,
-  50: 4.6,
-  51: 4.4,
-  52: 4.5,
-  53: 4.0,
-  54: 4.2,
-  55: 4.6,
-  56: 4.3,
-  57: 4.7,
-  58: 4.1,
-  59: 4.2,
-  60: 4.3,
-  61: 4.1,
-  62: 3.8,
-  63: 4.6,
-  64: 4.3,
-  65: 4.4,
-  66: 4.5,
-  67: 4.0,
-  68: 4.7,
-  69: 4.1,
-  70: 4.5,
-  71: 4.7,
-  72: 4.4,
-  73: 4.2,
-  74: 4.6,
-  75: 4.0,
-  76: 4.2,
-  77: 4.4,
-  78: 4.6,
-  79: 4.0,
-  80: 4.1,
-  81: 4.8,
-  82: 4.3,
-  83: 4.1,
-  84: 4.7,
-  85: 4.4,
-  86: 4.0,
-  87: 4.3,
-  88: 4.8,
-  89: 4.5,
-  90: 4.1,
-  91: 4.8,
-  92: 4.6,
-  93: 4.3,
-  94: 4.2,
-  95: 4.5,
-  96: 4.0,
-  97: 4.1,
-  98: 3.8,
-  99: 4.4,
-  100: 4.5,
+  1: 4.5, 2: 3.9, 3: 4.2, 4: 4.4, 5: 3.8, 6: 4.7, 7: 4.3, 8: 4.1, 9: 4.0, 10: 4.2,
+  11: 4.6, 12: 4.5, 13: 4.3, 14: 4.4, 15: 4.1, 16: 4.2, 17: 4.6, 18: 3.9, 19: 4.8, 20: 3.7,
+  21: 4.1, 22: 4.3, 23: 4.0, 24: 4.4, 25: 4.7, 26: 4.5, 27: 4.2, 28: 4.4, 29: 4.1, 30: 4.0,
+  31: 4.2, 32: 3.5, 33: 4.3, 34: 4.6, 35: 4.0, 36: 4.3, 37: 4.8, 38: 4.5, 39: 4.2, 40: 4.0,
+  41: 4.1, 42: 4.4, 43: 4.3, 44: 4.2, 45: 4.6, 46: 4.5, 47: 4.1, 48: 3.9, 49: 4.5, 50: 4.6,
+  51: 4.4, 52: 4.5, 53: 4.0, 54: 4.2, 55: 4.6, 56: 4.3, 57: 4.7, 58: 4.1, 59: 4.2, 60: 4.3,
+  61: 4.1, 62: 3.8, 63: 4.6, 64: 4.3, 65: 4.4, 66: 4.5, 67: 4.0, 68: 4.7, 69: 4.1, 70: 4.5,
+  71: 4.7, 72: 4.4, 73: 4.2, 74: 4.6, 75: 4.0, 76: 4.2, 77: 4.4, 78: 4.6, 79: 4.0, 80: 4.1,
+  81: 4.8, 82: 4.3, 83: 4.1, 84: 4.7, 85: 4.4, 86: 4.0, 87: 4.3, 88: 4.8, 89: 4.5, 90: 4.1,
+  91: 4.8, 92: 4.6, 93: 4.3, 94: 4.2, 95: 4.5, 96: 4.0, 97: 4.1, 98: 3.8, 99: 4.4, 100: 4.5,
+  101: 4.6, 102: 4.2, 103: 4.8, 104: 4.1, 105: 4.4, 106: 4.3, 107: 4.0, 108: 4.7, 109: 4.1, 110: 4.2,
+  111: 3.9, 112: 4.5, 113: 4.3, 114: 4.0, 115: 4.1, 116: 4.6, 117: 4.3,
 };
 
 export default function Home() {
@@ -141,6 +57,10 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
+  const [viewMode, setViewMode] = useState("list");
+
+  const [visibleCount, setVisibleCount] = useState(40);
+
   const { scrollYProgress } = useScroll();
   const yBackground = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
@@ -148,6 +68,10 @@ export default function Home() {
   useEffect(() => {
     fetchCompanies();
   }, []);
+
+  useEffect(() => {
+    setVisibleCount(40);
+  }, [searchTerm, activeCategory]);
 
   useEffect(() => {
     if (isComparing) {
@@ -209,6 +133,10 @@ export default function Home() {
     return filtered;
   }, [companies, searchTerm, activeCategory]);
 
+  const displayedCompanies = useMemo(() => {
+    return visibleCompanies.slice(0, visibleCount);
+  }, [visibleCompanies, visibleCount]);
+
   const selectedCompanies = useMemo(() => {
     return companies.filter((c) => selectedIds.includes(c.id));
   }, [companies, selectedIds]);
@@ -232,6 +160,10 @@ export default function Home() {
     if (newSelection.length === 0) {
       setIsComparing(false);
     }
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 40);
   };
 
   const getLogoUrl = (company) => {
@@ -273,7 +205,7 @@ export default function Home() {
       section: "Overview",
       icon: <BarChart3 className="w-5 h-5" />,
       rows: [
-        { label: "Rating", value: (c) => REAL_RATINGS[c.id] || "N/A" }, // Ratingni comparison ga ham qo'shdik
+        { label: "Rating", value: (c) => REAL_RATINGS[c.id] || "N/A" },
         { label: "Founded", value: (c) => c.founded_year },
         { label: "Ownership", value: (c) => c.metrics?.ownership || "Private" },
         {
@@ -453,33 +385,53 @@ export default function Home() {
       </section>
       <div className="sticky top-[73px] z-30 bg-white border-b border-slate-200 shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-4 overflow-x-auto py-4 scrollbar-hide">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
-                  activeCategory === cat
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-4">
+            <div className="flex items-center gap-4 overflow-x-auto pb-2 md:pb-0 scrollbar-hide w-full md:w-auto">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${activeCategory === cat
                     ? "bg-orange-500 text-white shadow-md shadow-orange-500/25"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                }`}
-              >
-                {cat === "Best Rating" && (
-                  <Star
-                    className={`w-4 h-4 ${
-                      activeCategory === cat
-                        ? "fill-white"
-                        : "fill-slate-400 text-slate-400"
                     }`}
-                  />
-                )}
-                {cat}
+                >
+                  {cat === "Best Rating" && (
+                    <Star
+                      className={`w-4 h-4 ${activeCategory === cat ? "fill-white" : "fill-slate-400 text-slate-400"
+                        }`}
+                    />
+                  )}
+                  {cat}
+                </button>
+              ))}
+            </div>
+            <div className="flex bg-slate-100 p-1.5 rounded-xl self-end md:self-auto flex-shrink-0">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === "list"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                  }`}
+              >
+                <List size={18} />
+                List
               </button>
-            ))}
+              <button
+                onClick={() => setViewMode("map")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === "map"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                  }`}
+              >
+                <MapIcon size={18} />
+                Map
+              </button>
+            </div>
           </div>
         </div>
       </div>
-      <div className="bg-slate-50 py-20">
+      <div className="bg-slate-50 py-20 min-h-screen">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
@@ -489,6 +441,7 @@ export default function Home() {
               Explore our comprehensive directory of professional truck services
             </p>
           </div>
+
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -496,44 +449,84 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <motion.div
-              layout
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-            >
-              <AnimatePresence mode="popLayout">
-                {visibleCompanies.length > 0 ? (
-                  visibleCompanies.map((company) => (
+            <>
+              {viewMode === "list" ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <motion.div
+                    layout
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  >
+                    <AnimatePresence mode="popLayout">
+                      {displayedCompanies.length > 0 ? (
+                        displayedCompanies.map((company) => (
+                          <motion.div
+                            key={company.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            className="h-full"
+                          >
+                            <CompanyCard
+                              company={company}
+                              isSelected={selectedIds.includes(company.id)}
+                              toggleSelection={toggleSelection}
+                            />
+                          </motion.div>
+                        ))
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="col-span-full text-center py-20"
+                        >
+                          <Search className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                          <h3 className="text-2xl font-bold text-slate-700 mb-2">
+                            No services found
+                          </h3>
+                          <p className="text-slate-500">
+                            Try adjusting your search or filters
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                  {visibleCount < visibleCompanies.length && (
                     <motion.div
-                      key={company.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      className="h-full"
+                      className="mt-16 text-center"
                     >
-                      <CompanyCard
-                        company={company}
-                        isSelected={selectedIds.includes(company.id)}
-                        toggleSelection={toggleSelection}
-                      />
+                      <button
+                        onClick={handleLoadMore}
+                        className="inline-flex items-center gap-2 bg-white text-slate-700 border border-slate-300 px-8 py-4 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-400 hover:text-slate-900 transition-all shadow-sm active:scale-95"
+                      >
+                        <span>See More Companies</span>
+                        <ChevronDown size={20} />
+                      </button>
+                      <p className="text-slate-400 text-sm mt-3">
+                        Showing {displayedCompanies.length} of {visibleCompanies.length} results
+                      </p>
                     </motion.div>
-                  ))
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="col-span-full text-center py-20"
-                  >
-                    <Search className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                    <h3 className="text-2xl font-bold text-slate-700 mb-2">
-                      No services found
-                    </h3>
-                    <p className="text-slate-500">
-                      Try adjusting your search or filters
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="w-full"
+                >
+                  <MapView companies={visibleCompanies} />
+                  <p className="text-center text-slate-500 text-sm mt-4">
+                    Showing all {visibleCompanies.length} locations on map
+                  </p>
+                </motion.div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -598,11 +591,10 @@ export default function Home() {
                 <button
                   onClick={() => setIsComparing(true)}
                   disabled={selectedIds.length < 2}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    selectedIds.length < 2
-                      ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5"
-                      : "bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-500/25 active:scale-95"
-                  }`}
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${selectedIds.length < 2
+                    ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5"
+                    : "bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-500/25 active:scale-95"
+                    }`}
                 >
                   Compare
                   <ChevronRight size={16} />
